@@ -17,13 +17,15 @@ trait Matcher[TIn, TOut] {
 
 case class Terminal(matcher: Matcher[String, String]) extends Symbol {
   val isTerminal = true
+
+  //override def toString: String = s"Terminal(${matcher.toString})"
 }
 
 case object IntMatcher extends Matcher[String, String] {
-  val re: Regex = re("^[0-9]+$")
+  val regex: Regex = "^[0-9]+$".r
 
   override def tryMatch(input: String): Option[String] = {
-    re.findFirstIn(input)
+    regex.findFirstIn(input)
   }
 }
 
@@ -33,7 +35,7 @@ case class StringMatcher(str: String) extends Matcher[String, String] {
   }
 }
 
-case class Rule(left: NonTerminal, expansion: Array[Array[Symbol]])
+case class Rule(left: NonTerminal, expansion: IndexedSeq[IndexedSeq[Symbol]])
 
 object matchers {
   val integer = Terminal(IntMatcher)
@@ -46,19 +48,19 @@ object test {
   val expr = NonTerminal("EXPR")
   val op = NonTerminal("OP")
 
-  type Grammar = Array[Rule]
+  type Grammar = IndexedSeq[Rule]
 
-  val grammar: Grammar = Array[Rule](
-    Rule(NonTerminal("MAIN"), Array(Array(expr))),
-    Rule(expr, Array[Array[Symbol]](
-      Array(integer),
-      Array(str("("), expr, str(")")),
-      Array(expr, op, expr)
+  val grammar: Grammar = Vector[Rule](
+    Rule(NonTerminal("MAIN"), Vector(Vector(expr))),
+    Rule(expr, Vector[Vector[Symbol]](
+      Vector(integer),
+      Vector(str("("), expr, str(")")),
+      Vector(expr, op, expr)
     )),
 
-    Rule(op, Array(
-      Array(str("+")),
-      Array(str("-"))
+    Rule(op, Vector(
+      Vector(str("+")),
+      Vector(str("-"))
     ))
   )
 
