@@ -50,7 +50,7 @@ class Earley {
 
     val table: mutable.Map[Int, mutable.ArrayBuffer[EarleyRecord]] = mutable.Map[Int, mutable.ArrayBuffer[EarleyRecord]]()
 
-    def addToTable(items: (Int, EarleyRecord)*): Unit = {
+    def addToTable(items: Seq[(Int, EarleyRecord)]): Unit = {
       for {
         (index, ruleState) <- items
       } {
@@ -62,29 +62,30 @@ class Earley {
       }
     }
 
-    def processChar(index: Int, word: TInToken): Unit = {
-      for (ruleState <- table.getOrElse(index, ArrayBuffer.empty)) {
-        if(!finihed(ruleState)) {
-          nextElementOf(ruleState) match {
-            case symbol @ Terminal(_) => {
-              val newRules = scanner(ruleState, symbol, index, word)
-              addToTable(newRules.toSeq:_*)
-            }
-            case s @ NonTerminal(_) => ???
-          }
-        } else {
-          completer(table, ruleState, index)
-        }
-      }
-    }
-
     val start = EarleyRecord(grammar(0).left, grammar(0).expansion(0), 0, 0)
     table(0) = new mutable.ArrayBuffer()
     table(0).append(start)
 
     for (index <- content.indices) {
       val word = content(index)
-      processChar(index, word)
+
+      var currentPosition = 0
+      while(currentPosition < table.getOrElse(index, ArrayBuffer.empty).length) {
+        val ruleState = table.getOrElse(index, ArrayBuffer.empty)(currentPosition)
+        if(!finihed(ruleState)) {
+          nextElementOf(ruleState) match {
+            case symbol @ Terminal(_) => {
+              val newRules = scanner(ruleState, symbol, index, word)
+              addToTable(newRules.toSeq)
+            }
+            case s @ NonTerminal(_) => ???
+          }
+        } else {
+          val newRules = completer(table, ruleState, index)
+          addToTable(newRules)
+        }
+        currentPosition += 1
+      }
     }
 
     println(table.mkString("Map (", System.lineSeparator(), ")"))
