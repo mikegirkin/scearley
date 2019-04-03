@@ -35,33 +35,23 @@ case class StringMatcher(str: String) extends Matcher[String, String] {
   }
 }
 
-case class Rule(left: NonTerminal, expansion: IndexedSeq[IndexedSeq[Symbol]])
+case class Rule(left: NonTerminal, expansion: IndexedSeq[RuleString])
+case class RuleString(items: IndexedSeq[Symbol]) {
+  def append(item: Symbol): RuleString = this.copy(items :+ item)
+}
+
+object RuleString {
+  def apply(item: Symbol*): RuleString = new RuleString(item.toIndexedSeq)
+  def apply(items: IndexedSeq[Symbol]): RuleString = new RuleString(items)
+}
+
+case class Grammar(rules: IndexedSeq[Rule]) extends AnyVal
+
+object Grammar {
+  def apply(rules: Rule*): Grammar = new Grammar(rules.toVector)
+}
 
 object matchers {
   val integer = Terminal(IntMatcher)
   def str(s: String) = Terminal(StringMatcher(s))
-}
-
-object test {
-  import matchers._
-
-  val expr = NonTerminal("EXPR")
-  val op = NonTerminal("OP")
-
-  type Grammar = IndexedSeq[Rule]
-
-  val grammar: Grammar = Vector[Rule](
-    Rule(NonTerminal("MAIN"), Vector(Vector(expr))),
-    Rule(expr, Vector[Vector[Symbol]](
-      Vector(integer),
-      Vector(str("("), expr, str(")")),
-      Vector(expr, op, expr)
-    )),
-
-    Rule(op, Vector(
-      Vector(str("+")),
-      Vector(str("-"))
-    ))
-  )
-
 }
