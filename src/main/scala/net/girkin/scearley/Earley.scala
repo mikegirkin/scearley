@@ -3,22 +3,31 @@ package net.girkin.scearley
 import scala.collection._
 import scala.collection.mutable.ArrayBuffer
 
+case class SymbolParseResult(
+  symbol: Symbol,
+  begin: Int,
+  end: Int
+)
+
 case class EarleyRecord(
   ruleLeft: NonTerminal,
   ruleExpansion: RuleString,
   dotPosition: Int,
-  startPosition: Int
+  startPosition: Int,
+  parsingMetadata: Vector[SymbolParseResult] = Vector()
 ) {
+
   def currentSymbol: Option[Symbol] = ruleExpansion.items.lift(dotPosition)
 
   def finished: Boolean = {
     dotPosition == ruleExpansion.items.length
   }
+
 }
 
 case class ParsingResult(
   isCorrect: Boolean,
-  table: Map[Int, IndexedSeq[EarleyRecord]]
+  table: immutable.Map[Int, IndexedSeq[EarleyRecord]]
 )
 
 class Earley {
@@ -30,7 +39,8 @@ class Earley {
         (
           currentSymbolIndex + 1,
           ruleState.copy(
-            dotPosition = ruleState.dotPosition + 1
+            dotPosition = ruleState.dotPosition + 1,
+            parsingMetadata = ruleState.parsingMetadata :+ SymbolParseResult(symbol, currentSymbolIndex, currentSymbolIndex)
           )
         )
       }
@@ -54,7 +64,8 @@ class Earley {
       ruleState <- table(completingRuleState.startPosition).filter(rule => rule.currentSymbol.contains(completingRuleState.ruleLeft))
     } yield {
       currentSymbolIndex -> ruleState.copy(
-        dotPosition = ruleState.dotPosition + 1
+        dotPosition = ruleState.dotPosition + 1,
+        parsingMetadata = ruleState.parsingMetadata :+ SymbolParseResult(completingRuleState.ruleLeft, completingRuleState.startPosition, currentSymbolIndex)
       )
     }
   }
@@ -114,6 +125,7 @@ class Earley {
       )
     )
 
-    ParsingResult(isCorrect, table)
+    ParsingResult(isCorrect, table.toMap)
   }
 }
+

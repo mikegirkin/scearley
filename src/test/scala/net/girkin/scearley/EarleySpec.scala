@@ -81,7 +81,7 @@ class EarleySpec extends FunSpec with Matchers{
 
   describe("parsing using EXPR recursive grammar") {
     // EXPR :- EXPR OP EXPR
-    //       | int
+    //       | 'int
     //       | ( EXPR )
     // OP :- +
     //     | -
@@ -119,9 +119,9 @@ class EarleySpec extends FunSpec with Matchers{
       it(s"parses correctly ${input}") {
         val result = earley.parse(grammar, input)
         result.isCorrect shouldBe expected
+
+        val tree = ParseTreeBuilder.build(result.table)
       }
     }
-
   }
-
 }
