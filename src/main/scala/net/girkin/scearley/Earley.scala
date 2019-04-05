@@ -40,7 +40,7 @@ class Earley {
           currentSymbolIndex + 1,
           ruleState.copy(
             dotPosition = ruleState.dotPosition + 1,
-            parsingMetadata = ruleState.parsingMetadata :+ SymbolParseResult(symbol, currentSymbolIndex, currentSymbolIndex)
+            parsingMetadata = ruleState.parsingMetadata :+ SymbolParseResult(symbol, currentSymbolIndex, currentSymbolIndex + 1)
           )
         )
       }
@@ -100,14 +100,12 @@ class Earley {
         val ruleState = table.getOrElse(index, ArrayBuffer.empty)(currentPosition)
         if (!ruleState.finished) {
           ruleState.currentSymbol match {
-            case Some(symbol @ Terminal(_)) => {
+            case Some(symbol @ Terminal(_)) =>
               val newRules = scanner(ruleState, symbol, index, word)
               addToTable(table, newRules.toSeq)
-            }
-            case Some(NonTerminal(_)) => {
+            case Some(NonTerminal(_)) =>
               val newRules = predictor(table, grammar, ruleState, index)
               addToTable(table, newRules)
-            }
           }
         } else {
           val newRules = completer(table, ruleState, index)

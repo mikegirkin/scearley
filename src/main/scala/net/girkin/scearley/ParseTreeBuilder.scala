@@ -34,7 +34,7 @@ object ParseTreeBuilder {
 
   def buildTree(rootRecord: EarleyRecord, chart: Map[Int, IndexedSeq[EarleyRecord]]): ParseTreeNode = {
 
-    val children = rootRecord.parsingMetadata.flatMap {
+    val possibleChildren = rootRecord.parsingMetadata.flatMap {
       item => item.symbol match {
         case s@Terminal(_) =>
           Some(ParseTreeTerminal(
@@ -50,11 +50,12 @@ object ParseTreeBuilder {
           }
       }
     }
+
     ParseTreeNonTerminal(
       rootRecord.ruleLeft,
       rootRecord.startPosition,
       rootRecord.parsingMetadata.last.end,
-      children
+      possibleChildren
     )
   }
 }
