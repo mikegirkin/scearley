@@ -1,6 +1,5 @@
 package net.girkin.scearley
 
-import scala.util.Try
 import scala.util.matching.Regex
 
 trait Symbol {

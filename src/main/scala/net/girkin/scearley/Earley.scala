@@ -88,9 +88,11 @@ class Earley {
 
     val table: mutable.Map[Int, mutable.ArrayBuffer[EarleyRecord]] = mutable.Map[Int, mutable.ArrayBuffer[EarleyRecord]]()
 
-    val start = EarleyRecord(grammar.rules(0).left, grammar.rules(0).expansion(0), 0, 0)
-    table(0) = new mutable.ArrayBuffer()
-    table(0).append(start)
+    val startRule = grammar.rules(0)
+    val start = startRule.expansion.map {
+      expansion => 0 -> EarleyRecord(startRule.left, expansion, 0, 0)
+    }
+    addToTable(table, start)
 
     for (index <- Range(0, content.length+1)) {
       val word = content.lift(index)
@@ -119,7 +121,7 @@ class Earley {
       false
     )(
       _.exists(item =>
-        item.ruleLeft == start.ruleLeft && item.dotPosition == item.ruleExpansion.items.size && item.startPosition == 0
+        item.ruleLeft == startRule.left && item.dotPosition == item.ruleExpansion.items.size && item.startPosition == 0
       )
     )
 

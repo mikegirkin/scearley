@@ -21,7 +21,7 @@ class EarleySpec extends FunSpec with Matchers{
     for {
       (input, expected) <- tests
     } {
-      it(s"parses the easiest thing ${input}") {
+      it(s"parses the easiest thing $input") {
         earley.parse(grammar, input).isCorrect shouldBe expected
       }
     }
@@ -42,7 +42,7 @@ class EarleySpec extends FunSpec with Matchers{
     for {
       (input, expected) <- tests
     } {
-      it(s"parses correctly ${input}") {
+      it(s"parses correctly $input") {
         earley.parse(grammar, input).isCorrect shouldBe expected
       }
     }
@@ -73,7 +73,7 @@ class EarleySpec extends FunSpec with Matchers{
     for {
       (input, expected) <- tests
     } {
-      it(s"parses correctly ${input}") {
+      it(s"parses correctly $input") {
         earley.parse(grammar, input).isCorrect shouldBe expected
       }
     }
@@ -89,7 +89,6 @@ class EarleySpec extends FunSpec with Matchers{
     import GrammarDsl._
 
     val grammar = Grammar(
-      NT("MAIN") :- NT("EXPR"),
       NT("EXPR") :- {
         RuleString(integer) or
         (str("(") ~ NT("EXPR") ~ str(")")) or
@@ -116,7 +115,7 @@ class EarleySpec extends FunSpec with Matchers{
     for {
       (input, expected) <- tests
     } {
-      it(s"parses correctly ${input}") {
+      it(s"parses correctly $input") {
         val result = earley.parse(grammar, input)
         result.isCorrect shouldBe expected
 

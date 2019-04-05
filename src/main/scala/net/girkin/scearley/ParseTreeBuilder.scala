@@ -26,10 +26,12 @@ object ParseTreeBuilder {
     val rootNonTerminal = chart(0)(0).ruleLeft
     val lastIndex = completed.keys.max
     completed(lastIndex)
-      .filter(r => r.ruleLeft == rootNonTerminal)
-      .map { //TODO: Fix that
+      .find(r =>
+        r.ruleLeft == rootNonTerminal &&
+        r.startPosition == 0
+      ).map {
         er => buildTree(er, completed)
-      }
+      }.toSeq
   }
 
   def buildTree(rootRecord: EarleyRecord, chart: Map[Int, IndexedSeq[EarleyRecord]]): ParseTreeNode = {
@@ -46,7 +48,7 @@ object ParseTreeBuilder {
               er.startPosition == item.begin &&
               er.finished
           }.map {
-            er => buildTree(er, chart)
+            er => buildTree(er, chart) //TODO: Fix non-tailrec call
           }
       }
     }
